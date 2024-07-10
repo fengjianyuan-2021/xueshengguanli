@@ -1,0 +1,6 @@
+@学生干部考评管理系统API_HostAddress = http://localhost:5118
+
+GET {{学生干部考评管理系统API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
