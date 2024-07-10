@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/学生干部考评管理系统API/db.sqlite
+/学生干部考评管理系统API/db.sqlite-shm
+/学生干部考评管理系统API/db.sqlite-wal
