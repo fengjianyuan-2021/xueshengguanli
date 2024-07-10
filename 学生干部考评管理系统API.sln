@@ -5,6 +5,10 @@ VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "学生干部考评管理系统API", "学生干部考评管理系统API\学生干部考评管理系统API.csproj", "{EB3EE09B-DA1F-4423-AF10-196F9BE9888B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "学生干部考评管理系统模型", "学生干部考评管理系统模型\学生干部考评管理系统模型.csproj", "{EB778F4B-98E3-4140-AD9D-B111CFE8DA61}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "学生干部考评管理系统数据库映射", "学生干部考评管理系统数据库映射\学生干部考评管理系统数据库映射.csproj", "{19C5BC60-D438-4BEC-9A56-BE8234FB751A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{EB3EE09B-DA1F-4423-AF10-196F9BE9888B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EB3EE09B-DA1F-4423-AF10-196F9BE9888B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EB3EE09B-DA1F-4423-AF10-196F9BE9888B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EB778F4B-98E3-4140-AD9D-B111CFE8DA61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EB778F4B-98E3-4140-AD9D-B111CFE8DA61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EB778F4B-98E3-4140-AD9D-B111CFE8DA61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EB778F4B-98E3-4140-AD9D-B111CFE8DA61}.Release|Any CPU.Build.0 = Release|Any CPU
+		{19C5BC60-D438-4BEC-9A56-BE8234FB751A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{19C5BC60-D438-4BEC-9A56-BE8234FB751A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{19C5BC60-D438-4BEC-9A56-BE8234FB751A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{19C5BC60-D438-4BEC-9A56-BE8234FB751A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
