@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,12 +11,8 @@ namespace 学生干部考评管理系统模型.DTO
     /// <summary>
     /// 用户数据传输对象
     /// </summary>
-    public class UserDto 
+    public class CreateUserDto
     {
-        /// <summary>
-        /// ID
-        /// </summary>
-        public string Id { get; set; }
         /// <summary>
         /// 用户账号
         /// </summary>
@@ -72,32 +67,6 @@ namespace 学生干部考评管理系统模型.DTO
         /// 总分
         /// </summary>
         public float? TotalScore { get; set; }
-
-        /// <summary>
-        /// 评分(自我评价)
-        /// </summary>
-        public string? SelfScore { get; set; } = string.Empty;
-
-        /// <summary>
-        /// 评价者分数
-        /// </summary>
-        public string? Evaluatorsorce {  get; set; }
-
-        /// <summary>
-        /// 评价者ID
-        /// </summary>
-        public string? EvaluatorId { get; set; }
-
-        /// <summary>
-        /// 互评平均分
-        /// </summary>
-        public string? PeerAverageScore { get; set; } =string.Empty;
-
-        /// <summary>
-        /// 教师评分
-        /// </summary>
-        public string? TeacherAverageScore { get; set; } = string.Empty;
-
     }
 
 }

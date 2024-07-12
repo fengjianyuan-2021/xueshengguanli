@@ -11,7 +11,7 @@ namespace 学生干部考评管理系统模型.Enity
     /// <summary>
     /// 公用模型
     /// </summary>
-    public class BaseEnity
+    public class BaseEntity
     {
 
         /// <summary>

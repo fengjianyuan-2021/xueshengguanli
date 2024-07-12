@@ -4,6 +4,7 @@ using 学生干部考评管理系统模型.StudentCadreEvaluation.Models;
 using 学生干部考评管理系统数据库映射;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
+using 学生干部考评管理系统API.Helper;
 
 namespace 学生干部考评管理系统API.Service
 {
@@ -58,14 +59,14 @@ namespace 学生干部考评管理系统API.Service
         /// <returns>如果修改成功，返回 true；否则返回 false</returns>
         public async Task<bool> ChangePasswordAsync(string username, string newPassword)
         {
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username);
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.Username == username && u.IsDeleted==false);
             if (user == null)
             {
                 _logger.LogWarning("User not found: {Username}", username);
                 return false;
             }
 
-            user.PasswordHash = CreatePasswordHash(newPassword);
+            user.PasswordHash = CodeHelper.CreatePasswordHash(newPassword);
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
             return true;
@@ -85,23 +86,9 @@ namespace 学生干部考评管理系统API.Service
         {
             // 使用适当的方法验证密码哈希
             // 这里仅作为示例，实际生产环境请使用更安全的哈希验证方法
-            return storedHash == CreatePasswordHash(password);
+            return storedHash ==CodeHelper.CreatePasswordHash(password);
         }
 
-        private string CreatePasswordHash(string password)
-        {
-            // 使用适当的方法创建密码哈希
-            // 这里仅作为示例，实际生产环境请使用更安全的哈希算法
-            using (var sha256 = SHA256.Create())
-            {
-                var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                var builder = new StringBuilder();
-                for (var i = 0; i < bytes.Length; i++)
-                {
-                    builder.Append(bytes[i].ToString("x2"));
-                }
-                return builder.ToString();
-            }
-        }
+       
     }
 }

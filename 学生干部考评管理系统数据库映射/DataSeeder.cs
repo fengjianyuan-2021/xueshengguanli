@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using 学生干部考评管理系统模型.Enum;
 using 学生干部考评管理系统模型.StudentCadreEvaluation.Models;
 
 namespace 学生干部考评管理系统数据库映射

@@ -4,15 +4,24 @@ using 学生干部考评管理系统API.Interface;
 using 学生干部考评管理系统API.Service;
 using 学生干部考评管理系统数据库映射;
 using Microsoft.EntityFrameworkCore;
+using 学生干部考评管理系统API;
+using 学生干部考评管理系统模型.DTO;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
 // Configure DbContext with SQLite
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// 注册 AutoMapper，并添加包含映射配置文件的程序集
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<MappingProfile>();
+}, typeof(Program).Assembly, typeof(UserDto).Assembly);
 
 builder.Services.AddSwaggerGen();
 

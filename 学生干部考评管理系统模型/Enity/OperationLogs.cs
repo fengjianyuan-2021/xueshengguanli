@@ -11,7 +11,7 @@ namespace 学生干部考评管理系统模型.Enity
     /// 操作日志表
     /// 存储系统操作日志，用于记录用户的操作行为。
     /// </summary>
-    public class OperationLog : BaseEnity
+    public class OperationLog : BaseEntity
     {
         /// <summary>
         /// 关联的用户ID

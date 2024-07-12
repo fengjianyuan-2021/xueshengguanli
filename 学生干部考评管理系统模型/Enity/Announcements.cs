@@ -10,7 +10,7 @@ namespace 学生干部考评管理系统模型.Enity
     /// 公告表
     /// 存储系统公告信息。
     /// </summary>
-    public class Announcement : BaseEnity
+    public class Announcement : BaseEntity
     {
         /// <summary>
         /// 公告标题

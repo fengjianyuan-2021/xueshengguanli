@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using 学生干部考评管理系统数据库映射;
 
@@ -10,9 +11,11 @@ using 学生干部考评管理系统数据库映射;
 namespace 学生干部考评管理系统数据库映射.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240711181222_DropTable")]
+    partial class DropTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.7");
@@ -52,12 +55,13 @@ namespace 学生干部考评管理系统数据库映射.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Comments")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("CreateOn")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime?>("EvaluationDate")
+                    b.Property<DateTime>("EvaluationDate")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("EvaluationType")
@@ -69,20 +73,30 @@ namespace 学生干部考评管理系统数据库映射.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
-                    b.Property<float?>("Score")
+                    b.Property<float>("Score")
                         .HasColumnType("REAL");
 
                     b.Property<int>("StudentCadreId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int?>("StudentCadreInfoId")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("UpdateOn")
                         .HasColumnType("TEXT");
+
+                    b.Property<int?>("UserId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
                     b.HasIndex("EvaluatorId");
 
                     b.HasIndex("StudentCadreId");
+
+                    b.HasIndex("StudentCadreInfoId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Evaluations");
                 });
@@ -125,21 +139,22 @@ namespace 学生干部考评管理系统数据库映射.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("AvatarPath")
+                    b.Property<byte[]>("Avatar")
                         .IsRequired()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("BLOB");
 
                     b.Property<DateTime>("CreateOn")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Fullname")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("Gender")
+                    b.Property<int>("Gender")
                         .HasColumnType("INTEGER");
 
                     b.Property<bool>("IsDeleted")
@@ -160,7 +175,7 @@ namespace 学生干部考评管理系统数据库映射.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("INTEGER");
 
-                    b.Property<float?>("TotalScore")
+                    b.Property<float>("TotalScore")
                         .HasColumnType("REAL");
 
                     b.Property<DateTime>("UpdateOn")
@@ -177,17 +192,25 @@ namespace 学生干部考评管理系统数据库映射.Migrations
 
             modelBuilder.Entity("学生干部考评管理系统模型.Enity.Evaluation", b =>
                 {
-                    b.HasOne("学生干部考评管理系统模型.StudentCadreEvaluation.Models.User", "User")
-                        .WithMany("SelfEvaluations")
+                    b.HasOne("学生干部考评管理系统模型.StudentCadreEvaluation.Models.User", null)
+                        .WithMany()
                         .HasForeignKey("EvaluatorId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("学生干部考评管理系统模型.StudentCadreEvaluation.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("StudentCadreId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("学生干部考评管理系统模型.StudentCadreEvaluation.Models.User", "StudentCadreInfo")
-                        .WithMany("OtherEvaluations")
-                        .HasForeignKey("StudentCadreId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .WithMany()
+                        .HasForeignKey("StudentCadreInfoId");
+
+                    b.HasOne("学生干部考评管理系统模型.StudentCadreEvaluation.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId");
 
                     b.Navigation("StudentCadreInfo");
 
@@ -201,13 +224,6 @@ namespace 学生干部考评管理系统数据库映射.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("学生干部考评管理系统模型.StudentCadreEvaluation.Models.User", b =>
-                {
-                    b.Navigation("OtherEvaluations");
-
-                    b.Navigation("SelfEvaluations");
                 });
 #pragma warning restore 612, 618
         }
