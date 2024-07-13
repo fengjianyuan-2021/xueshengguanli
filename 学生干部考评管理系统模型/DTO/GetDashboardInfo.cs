@@ -54,8 +54,34 @@ namespace 学生干部考评管理系统模型.DTO
         public int TeacherPercentage { get; set; }
 
         /// <summary>
+        /// 历史评价总数
+        /// </summary>
+        public int TotalCount { get; set; }
+
+        /// <summary>
+        /// 学时统计
+        /// </summary>
+        public float ClassHourCount { get; set; } = 0;
+
+        /// <summary>
         /// 教师对学生的评价查询
         /// </summary>
         public List<StudentEvaluationSummaryDto> StudentEvaluationSummaryDtos { get; set; }
+
+        /// <summary>
+        /// 我的历史评价
+        /// </summary>
+        public List<EvaluationDto>? EvaluationDtos { get; set; }
+
+        /// <summary>
+        /// 用户时长
+        /// </summary>
+        public List<float>? HourList { get; set; }
+        /// <summary>
+        /// 用户列表
+        /// </summary>
+        public List<string>? UserList { get; set; }
+
+
     }
 }

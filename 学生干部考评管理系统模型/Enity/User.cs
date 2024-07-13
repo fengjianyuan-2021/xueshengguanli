@@ -58,9 +58,9 @@
             public string Organization { get; set; } = string.Empty;
 
             /// <summary>
-            /// 总分
+            /// 学时
             /// </summary>
-            public float? TotalScore { get; set; }
+            public float? ClassHour { get; set; } = 0;
 
             [NotMapped]
             /// <summary>

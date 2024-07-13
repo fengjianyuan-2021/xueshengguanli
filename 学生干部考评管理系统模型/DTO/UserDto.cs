@@ -34,6 +34,11 @@ namespace 学生干部考评管理系统模型.DTO
         public string? PasswordHash { get; set; } = string.Empty;
 
         /// <summary>
+        /// 学时
+        /// </summary>
+        public float? ClassHour { get; set; } = 0;
+
+        /// <summary>
         /// 性别
         /// </summary>
         public Gender? Gender { get; set; }

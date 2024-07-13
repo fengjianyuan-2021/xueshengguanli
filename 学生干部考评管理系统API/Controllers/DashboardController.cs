@@ -25,9 +25,9 @@ namespace 学生干部考评管理系统API.Controllers
         /// 获取统计信息
         /// </summary>
         [HttpPost("GetDashboardTeacher")]
-        public async Task<ActionResult<GetDashboardInfo>> GetDashboardTeacher()
+        public async Task<ActionResult<GetDashboardInfo>> GetDashboardTeacher([FromBody] GetStudentStatisticsInStudentParam getStudentStatisticsInStudent)
         {
-            var dashboardTeachers = await _dashboardService.GetStudentStatistics();
+            var dashboardTeachers = await _dashboardService.GetStudentStatisticsInTeacher( getStudentStatisticsInStudent.userId);
             return Ok(dashboardTeachers);
         }
 
@@ -40,6 +40,35 @@ namespace 学生干部考评管理系统API.Controllers
         public async Task<ActionResult<IEnumerable<EvaluationDto>>> GetEvaluationsByUserId(int userId)
         {
             var evaluations = await _dashboardService.GetEvaluationsByUserId(userId);
+            return Ok(evaluations);
+        }
+
+        public class GetStudentStatisticsInStudentParam { 
+
+            public int userId { get; set; }
+        }
+
+        /// <summary>
+        /// 根据用户ID查询其所有评价
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        /// <returns>用户的评价列表</returns>
+        [HttpPost("GetStudentStatisticsInStudent")]
+        public async Task<ActionResult<IEnumerable<GetDashboardInfo>>> GetStudentStatisticsInStudent([FromBody] GetStudentStatisticsInStudentParam getStudentStatisticsInStudent)
+        {
+            var evaluations = await _dashboardService.GetStudentStatisticsInStudent(getStudentStatisticsInStudent.userId);
+            return Ok(evaluations);
+        }
+
+        /// <summary>
+        /// 查询所有
+        /// </summary>
+        /// <param name="userId">用户ID</param>
+        /// <returns>用户的评价列表</returns>
+        [HttpPost("GetAll")]
+        public async Task<ActionResult<IEnumerable<GetDashboardInfo>>> GetAll( )
+        {
+            var evaluations = await _dashboardService.GetAll();
             return Ok(evaluations);
         }
 

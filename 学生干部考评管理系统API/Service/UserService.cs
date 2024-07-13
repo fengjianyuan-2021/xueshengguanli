@@ -196,6 +196,14 @@ namespace 学生干部考评管理系统API.Service
                 existingUser.AvatarPath = user.AvatarPath;
             }
 
+            if (user.ClassHour != null) 
+            {
+                if (existingUser.ClassHour == null) 
+                {
+                    existingUser.ClassHour = 0;
+                }
+                existingUser.ClassHour = user.ClassHour.Value + existingUser.ClassHour;
+            }
 
             // 如果有密码更新，才更新密码
             if (!string.IsNullOrWhiteSpace(user.PasswordHash))

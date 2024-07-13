@@ -29,6 +29,12 @@ namespace 学生干部考评管理系统模型.DTO
         /// 评价平均分
         /// </summary>
         public float AverageScore { get; set; }
+
+        /// <summary>
+        /// 评价时间
+        /// </summary>
+        public DateTime EvaluationDate { get; set; }
+
     }
 
 }

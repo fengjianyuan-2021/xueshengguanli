@@ -6,9 +6,9 @@ namespace 学生干部考评管理系统API.Interface
     public interface IDashboardService
     {
         /// <summary>
-        /// 获取学生的统计信息（老师页面上方标签的）
+        /// 获取学生的统计信息（教师）
         /// </summary>
-        Task<GetDashboardInfo> GetStudentStatistics();
+        Task<GetDashboardInfo> GetStudentStatisticsInTeacher(int userId);
 
         /// <summary>
         /// 根据用户ID查询其所有评价
@@ -20,6 +20,12 @@ namespace 学生干部考评管理系统API.Interface
         /// <summary>
         /// 获取个人的统计信息（学生）
         /// </summary>
-        Task<GetDashboardInfo> GetStudentStatistics(int userId);
+        Task<GetDashboardInfo> GetStudentStatisticsInStudent(int userId);
+
+        /// <summary>
+        /// 查询全部
+        /// </summary>
+        /// <returns></returns>
+        Task<GetDashboardInfo> GetAll();
     }
 }

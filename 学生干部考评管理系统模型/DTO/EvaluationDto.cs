@@ -14,6 +14,11 @@ namespace 学生干部考评管理系统模型.DTO
     /// </summary>
     public class EvaluationDto
     {
+
+        /// <summary>
+        /// id
+        /// </summary>
+        public int? Id { get; set; }
         /// <summary>
         /// 被评价的学生干部
         /// </summary>

@@ -12,6 +12,7 @@ namespace 学生干部考评管理系统API
             CreateMap<User, UserDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id.ToString()))
                 .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .ForMember(dest => dest.ClassHour, opt => opt.Ignore())
                 ;
 
             CreateMap<UserDto, User>()

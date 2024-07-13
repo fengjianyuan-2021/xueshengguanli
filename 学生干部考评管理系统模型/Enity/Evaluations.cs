@@ -47,9 +47,15 @@ namespace 学生干部考评管理系统模型.Enity
         /// </summary>
         public DateTime? EvaluationDate { get; set; }
 
+        /// <summary>
+        /// 评价者ID
+        /// </summary>
         [NotMapped]
         public virtual User? User { get; set; }
 
+        /// <summary>
+        /// 被评价者的ID
+        /// </summary>
         [NotMapped]
         public virtual User? StudentCadreInfo { get; set; }
     }

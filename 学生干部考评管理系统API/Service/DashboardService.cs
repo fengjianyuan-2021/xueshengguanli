@@ -23,55 +23,42 @@ namespace 学生干部考评管理系统API.Service
         /// <summary>
         /// 获取学生的统计信息（教师）
         /// </summary>
-        public async Task<GetDashboardInfo> GetStudentStatistics()
+        public async Task<GetDashboardInfo> GetStudentStatisticsInTeacher(int userId)
         {
-            // 学生总数
-            var totalStudentsTask = _context.Users.CountAsync(r => !r.IsDeleted && r.Role == UserRole.StudentCadre);
-
-            // 已评价的学生总数
-            var evaluatedStudentsTask = _context.Users
-                .Include(r => r.OtherEvaluations)
-                .Where(r => r.OtherEvaluations != null && r.OtherEvaluations.Any(e => e.EvaluationType == EvaluationType.Teacher))
-                .CountAsync();
-
-            // 平均分数
-            var averageScoreTask = _context.Evaluations
-                .Where(e => e.EvaluationType == EvaluationType.Teacher && e.Score.HasValue)
-                .AverageAsync(e => e.Score.Value);
-
-            // 获取评价类别占比的总数
-            var totalCountTask = _context.Evaluations.CountAsync();
-
-            await Task.WhenAll(totalStudentsTask, evaluatedStudentsTask, averageScoreTask, totalCountTask);
-
-            var totalStudents = totalStudentsTask.Result;
-            var evaluatedStudents = evaluatedStudentsTask.Result;
-            var averageScore = averageScoreTask.Result;
-            var totalCount = totalCountTask.Result;
-
-            // 评价类别占比
-            int selfCount = 0;
-            int peerCount = 0;
-            int teacherCount = 0;
-
-            if (totalCount > 0)
+            var currentUser = await _context.Users.SingleOrDefaultAsync(e => e.Id == userId);
+            if (currentUser == null)
             {
-                var selfCountTask = _context.Evaluations.CountAsync(e => e.EvaluationType == EvaluationType.Self);
-                var peerCountTask = _context.Evaluations.CountAsync(e => e.EvaluationType == EvaluationType.Peer);
-                var teacherCountTask = _context.Evaluations.CountAsync(e => e.EvaluationType == EvaluationType.Teacher);
-
-                await Task.WhenAll(selfCountTask, peerCountTask, teacherCountTask);
-
-                selfCount = selfCountTask.Result;
-                peerCount = peerCountTask.Result;
-                teacherCount = teacherCountTask.Result;
+                return null;
             }
+            // 我的历史评价查询
+            var myevaluations = await _context.Evaluations.Where(e => e.EvaluatorId == userId && e.IsDeleted == false).OrderByDescending(r => r.CreateOn).Include(r => r.StudentCadreInfo).Include(r => r.User).ToListAsync();
 
-            // 学生统计评价查询 查询教师对学生的评价
-            var evaluations = await _context.Evaluations
-                .Include(e => e.StudentCadreInfo)
-                .Where(e => e.StudentCadreInfo != null && e.StudentCadreInfo.Role == UserRole.StudentCadre && e.EvaluationType == EvaluationType.Teacher)
-                .ToListAsync();
+            //学时查询
+            var suerList = await _context.Users.Where(e => e.IsDeleted==false && e.Role==UserRole.StudentCadre).ToListAsync();
+            var nameList = suerList.OrderByDescending(r => r.Id).Select(r => r.Fullname).ToList();
+            var hourList = suerList.OrderByDescending(r => r.Id).Select(r => r.ClassHour ?? 0).ToList();
+
+            //学生总数
+            var totalStudents = await _context.Users.CountAsync(r => !r.IsDeleted && r.Role == UserRole.StudentCadre && r.Id != userId);
+
+            // 我已评价的学生总数
+            var evaluatedStudents = myevaluations.Where(e => e.EvaluationType == EvaluationType.Teacher).Select(e => e.StudentCadreId).Distinct().Count();
+
+            // 我评价的平均分数
+            var averageScore = myevaluations
+                .Where(e => e.EvaluationType == EvaluationType.Teacher && e.Score.HasValue)
+                .Average(e => e.Score.Value);
+
+            //我的评价类别占比
+            var totalCount = myevaluations.Count;
+            var selfCount = myevaluations.Count(e => e.EvaluationType == EvaluationType.Self);
+            var peerCount = myevaluations.Count(e => e.EvaluationType == EvaluationType.Peer);
+            var teacherCount = myevaluations.Count(e => e.EvaluationType == EvaluationType.Teacher);
+
+            // 我的最新评价查询(不包括自评)
+            var evaluations = myevaluations
+                .Where(e => e.StudentCadreInfo != null && e.StudentCadreInfo.Role == UserRole.StudentCadre).OrderByDescending(r => r.UpdateOn)
+                .ToList();
 
             var studentEvaluationSummaries = evaluations
                 .GroupBy(e => e.StudentCadreInfo.Username)
@@ -80,7 +67,8 @@ namespace 学生干部考评管理系统API.Service
                     Id = g.First().StudentCadreId,
                     Username = g.Key,
                     Fullname = g.First().StudentCadreInfo?.Fullname ?? string.Empty,
-                    AverageScore = g.Average(e => e.Score.HasValue ? e.Score.Value : 0)
+                    AverageScore = g.Average(e => e.Score.HasValue ? e.Score.Value : 0),
+                    EvaluationDate = g.First().EvaluationDate.HasValue ? g.First().EvaluationDate.Value : DateTime.MinValue,
                 })
                 .ToList();
 
@@ -96,9 +84,13 @@ namespace 学生干部考评管理系统API.Service
                 SelfPercentage = totalCount > 0 ? (int)((selfCount / (double)totalCount) * 100) : 0,
                 PeerPercentage = totalCount > 0 ? (int)((peerCount / (double)totalCount) * 100) : 0,
                 TeacherPercentage = totalCount > 0 ? (int)((teacherCount / (double)totalCount) * 100) : 0,
-                StudentEvaluationSummaryDtos = studentEvaluationSummaries
-            };
+                StudentEvaluationSummaryDtos = studentEvaluationSummaries,
+                TotalCount = totalCount,
+                EvaluationDtos = _mapper.Map<List<EvaluationDto>>(myevaluations),
+                HourList = hourList,
+                UserList = nameList,
 
+            };
             return getDashboardInfo;
         }
 
@@ -106,41 +98,38 @@ namespace 学生干部考评管理系统API.Service
         /// <summary>
         /// 获取个人的统计信息（学生）
         /// </summary>
-        public async Task<GetDashboardInfo> GetStudentStatistics(int userId)
+        public async Task<GetDashboardInfo> GetStudentStatisticsInStudent(int userId)
         {
             var currentUser = await _context.Users.SingleOrDefaultAsync(e => e.Id == userId);
             if (currentUser == null)
             {
                 return null;
             }
+            // 我的历史评价查询
+            var myevaluations = await _context.Evaluations.Where(e => e.EvaluatorId == userId && e.IsDeleted == false).OrderByDescending(r=>r.CreateOn).Include(r => r.StudentCadreInfo).Include(r => r.User).ToListAsync();
 
-            // 学生总数
-            var totalStudents = await _context.Users.CountAsync(r => !r.IsDeleted && r.Role == UserRole.StudentCadre);
+            //学生总数
+            var totalStudents = await _context.Users.CountAsync(r => !r.IsDeleted && r.Role == UserRole.StudentCadre && r.Id!=userId);
 
-            // 已评价的学生总数
-            var evaluatedStudents = await _context.Evaluations
-                .Where(e => e.EvaluationType == EvaluationType.Peer && e.EvaluatorId == userId)
-                .Select(e => e.StudentCadreId)
-                .Distinct()
-                .CountAsync();
+            // 我已评价的学生总数
+            var evaluatedStudents = myevaluations.Where(e => e.EvaluationType == EvaluationType.Peer).Select(e => e.StudentCadreId).Distinct().Count();
 
-            // 平均分数
-            var averageScore = await _context.Evaluations
-                .Where(e => e.EvaluationType == EvaluationType.Peer && e.Score.HasValue && e.EvaluatorId == userId)
-                .AverageAsync(e => e.Score.Value);
+            // 我评价的平均分数
+            var averageScore = myevaluations
+                .Where(e => e.EvaluationType == EvaluationType.Peer && e.Score.HasValue)
+                .Average(e => e.Score.Value);
 
-            // 评价类别占比
-            var totalCount = await _context.Evaluations.CountAsync(e => e.EvaluatorId == userId);
-            var selfCount = await _context.Evaluations.CountAsync(e => e.EvaluationType == EvaluationType.Self && e.EvaluatorId == userId);
-            var peerCount = await _context.Evaluations.CountAsync(e => e.EvaluationType == EvaluationType.Peer && e.EvaluatorId == userId);
-            var teacherCount = await _context.Evaluations.CountAsync(e => e.EvaluationType == EvaluationType.Teacher && e.EvaluatorId == userId);
+            //我的评价类别占比
+            var totalCount = myevaluations.Count;
+            var selfCount = myevaluations.Count(e => e.EvaluationType == EvaluationType.Self);
+            var peerCount = myevaluations.Count(e => e.EvaluationType == EvaluationType.Peer);
+            var teacherCount = myevaluations.Count(e => e.EvaluationType == EvaluationType.Teacher);
 
-            // 学生统计评价查询
-            var evaluations = await _context.Evaluations
-                .Where(r => r.EvaluatorId == userId && r.EvaluationType == EvaluationType.Peer)
-                .Include(e => e.StudentCadreInfo)
-                .Where(e => e.StudentCadreInfo != null && e.StudentCadreInfo.Role == UserRole.StudentCadre)
-                .ToListAsync();
+            // 我的最新评价查询(不包括自评)
+            var evaluations = myevaluations
+                .Where(r => r.EvaluationType==EvaluationType.Peer)
+                .Where(e => e.StudentCadreInfo != null && e.StudentCadreInfo.Role == UserRole.StudentCadre).OrderByDescending(r=>r.UpdateOn)
+                .ToList();
 
             var studentEvaluationSummaries = evaluations
                 .GroupBy(e => e.StudentCadreInfo.Username)
@@ -149,7 +138,8 @@ namespace 学生干部考评管理系统API.Service
                     Id = g.First().StudentCadreId,
                     Username = g.Key,
                     Fullname = g.First().StudentCadreInfo?.Fullname ?? string.Empty,
-                    AverageScore = g.Average(e => e.Score.HasValue ? e.Score.Value : 0)
+                    AverageScore = g.Average(e => e.Score.HasValue ? e.Score.Value : 0),
+                    EvaluationDate = g.First().EvaluationDate.HasValue ? g.First().EvaluationDate.Value :DateTime.MinValue ,
                 })
                 .ToList();
 
@@ -165,12 +155,84 @@ namespace 学生干部考评管理系统API.Service
                 SelfPercentage = totalCount > 0 ? (int)((selfCount / (double)totalCount) * 100) : 0,
                 PeerPercentage = totalCount > 0 ? (int)((peerCount / (double)totalCount) * 100) : 0,
                 TeacherPercentage = totalCount > 0 ? (int)((teacherCount / (double)totalCount) * 100) : 0,
-                StudentEvaluationSummaryDtos = studentEvaluationSummaries
+                StudentEvaluationSummaryDtos = studentEvaluationSummaries,
+                TotalCount = totalCount,
+                EvaluationDtos = _mapper.Map<List<EvaluationDto>>(myevaluations),
+                ClassHourCount = currentUser.ClassHour!=null? currentUser.ClassHour.Value:0,
+
             };
 
             return getDashboardInfo;
         }
 
+
+        /// <summary>
+        /// 获取管理员的统计信息（所有）
+        /// </summary>
+        public async Task<GetDashboardInfo> GetAll()
+        {
+            // 历史评价查询
+            var myevaluations = await _context.Evaluations.Where(e => e.IsDeleted == false).OrderByDescending(r => r.CreateOn).Include(r => r.StudentCadreInfo).Include(r => r.User).ToListAsync();
+
+            //学生总数
+            var totalStudents = await _context.Users.CountAsync(r => !r.IsDeleted && r.Role == UserRole.StudentCadre);
+
+            //学时查询
+            var suerList = await _context.Users.Where(e => e.IsDeleted == false && e.Role == UserRole.StudentCadre).ToListAsync();
+            var nameList = suerList.OrderByDescending(r => r.Id).Select(r => r.Fullname).ToList();
+            var hourList = suerList.OrderByDescending(r => r.Id).Select(r => r.ClassHour ?? 0).ToList();
+
+            // 已评价的学生总数
+            var evaluatedStudents = myevaluations.Where(e => e.EvaluationType == EvaluationType.Teacher).Select(e => e.StudentCadreId).Distinct().Count();
+
+            // 评价的平均分数
+            var averageScore = myevaluations
+                .Where(e => e.EvaluationType == EvaluationType.Teacher && e.Score.HasValue)
+                .Average(e => e.Score.Value);
+
+            //评价类别占比
+            var totalCount = myevaluations.Count;
+            var selfCount = myevaluations.Count(e => e.EvaluationType == EvaluationType.Self);
+            var peerCount = myevaluations.Count(e => e.EvaluationType == EvaluationType.Peer);
+            var teacherCount = myevaluations.Count(e => e.EvaluationType == EvaluationType.Teacher);
+
+            // 最新评价查询
+            var evaluations = myevaluations
+                .Where(e => e.StudentCadreInfo != null && e.StudentCadreInfo.Role == UserRole.StudentCadre).OrderByDescending(r => r.UpdateOn)
+                .ToList();
+
+            var studentEvaluationSummaries = evaluations
+                .GroupBy(e => e.StudentCadreInfo.Username)
+                .Select(g => new StudentEvaluationSummaryDto
+                {
+                    Id = g.First().StudentCadreId,
+                    Username = g.Key,
+                    Fullname = g.First().StudentCadreInfo?.Fullname ?? string.Empty,
+                    AverageScore = g.Average(e => e.Score.HasValue ? e.Score.Value : 0),
+                    EvaluationDate = g.First().EvaluationDate.HasValue ? g.First().EvaluationDate.Value : DateTime.MinValue,
+                })
+                .ToList();
+
+            // 创建并返回统计信息
+            GetDashboardInfo getDashboardInfo = new()
+            {
+                StudentSums = totalStudents,
+                EvaluatedStudentCount = evaluatedStudents,
+                UnevaluatedStudentCount = totalStudents - evaluatedStudents,
+                AverageScore = averageScore.ToString("F2"),
+                EvaluatedStudentPercentage = totalStudents > 0 ? ((float)evaluatedStudents / totalStudents * 100).ToString("F2") : "0",
+                UnevaluatedStudentPercentage = totalStudents > 0 ? ((float)(totalStudents - evaluatedStudents) / totalStudents * 100).ToString("F2") : "0",
+                SelfPercentage = totalCount > 0 ? (int)((selfCount / (double)totalCount) * 100) : 0,
+                PeerPercentage = totalCount > 0 ? (int)((peerCount / (double)totalCount) * 100) : 0,
+                TeacherPercentage = totalCount > 0 ? (int)((teacherCount / (double)totalCount) * 100) : 0,
+                StudentEvaluationSummaryDtos = studentEvaluationSummaries,
+                TotalCount = totalCount,
+                EvaluationDtos = _mapper.Map<List<EvaluationDto>>(myevaluations),
+                HourList = hourList,
+                UserList = nameList,
+            };
+            return getDashboardInfo;
+        }
 
 
         /// <summary>
