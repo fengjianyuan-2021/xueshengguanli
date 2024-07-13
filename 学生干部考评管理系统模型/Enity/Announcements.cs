@@ -21,5 +21,10 @@ namespace 学生干部考评管理系统模型.Enity
         /// 公告内容
         /// </summary>
         public string Content { get; set; }
+
+        /// <summary>
+        /// 已读状态
+        /// </summary>
+        public virtual ICollection<AnnouncementReadStatus> ReadStatuses { get; set; } = new List<AnnouncementReadStatus>();
     }
 }

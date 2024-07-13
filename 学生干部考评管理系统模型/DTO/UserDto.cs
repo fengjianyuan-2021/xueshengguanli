@@ -31,7 +31,7 @@ namespace 学生干部考评管理系统模型.DTO
         /// <summary>
         /// 密码验证
         /// </summary>
-        public string? PasswordHash { get; set; }
+        public string? PasswordHash { get; set; } = string.Empty;
 
         /// <summary>
         /// 性别
@@ -67,11 +67,6 @@ namespace 学生干部考评管理系统模型.DTO
         /// 学生干部所属的部门或组织。
         /// </summary>
         public string? Organization { get; set; } = string.Empty;
-
-        /// <summary>
-        /// 总分
-        /// </summary>
-        public float? TotalScore { get; set; }
 
         /// <summary>
         /// 评分(自我评价)

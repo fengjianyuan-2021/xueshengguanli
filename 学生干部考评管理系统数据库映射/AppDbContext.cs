@@ -10,6 +10,7 @@ namespace 学生干部考评管理系统数据库映射
         public DbSet<Evaluation> Evaluations { get; set; }
         public DbSet<Announcement> Announcements { get; set; }
         public DbSet<OperationLog> OperationLogs { get; set; }
+        public DbSet<AnnouncementReadStatus> AnnouncementReadStatuses { get; set; }
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
@@ -66,6 +67,20 @@ namespace 学生干部考评管理系统数据库映射
                 entity.HasKey(e => e.Id);
             });
 
+            //通知管理
+            modelBuilder.Entity<AnnouncementReadStatus>()
+                .HasKey(ars => ars.Id);
+
+            modelBuilder.Entity<AnnouncementReadStatus>()
+                .HasOne(ars => ars.Announcement)
+                .WithMany(a => a.ReadStatuses)
+                .HasForeignKey(ars => ars.AnnouncementId);
+
+            modelBuilder.Entity<AnnouncementReadStatus>()
+                .HasOne(ars => ars.User)
+                .WithMany(u => u.ReadAnnouncements)
+                .HasForeignKey(ars => ars.UserId);
+
             // 操作日志表配置
             modelBuilder.Entity<OperationLog>(entity =>
             {
@@ -87,6 +102,8 @@ namespace 学生干部考评管理系统数据库映射
             UpdateTimestamps();
             return base.SaveChangesAsync(cancellationToken);
         }
+
+
 
         private void UpdateTimestamps()
         {

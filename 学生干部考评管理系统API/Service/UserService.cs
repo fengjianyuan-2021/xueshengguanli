@@ -99,7 +99,7 @@ namespace 学生干部考评管理系统API.Service
             if (user.OtherEvaluations != null && user.OtherEvaluations.Any())
             {
                 var teacherAverageScore = user.OtherEvaluations.Where(r => r.EvaluationType == EvaluationType.Teacher);
-                userDto.PeerAverageScore = teacherAverageScore.Any() ? teacherAverageScore.Average(e => e.Score).ToString() ?? "0" : "0";
+                userDto.TeacherAverageScore = teacherAverageScore.Any() ? teacherAverageScore.Average(e => e.Score).ToString() ?? "0" : "0";
             }
 
             //查询自己评分 只查最新的
@@ -171,6 +171,11 @@ namespace 学生干部考评管理系统API.Service
                 existingUser.Gender = user.Gender;
             }
 
+            if (user.Role != null)
+            {
+                existingUser.Role = user.Role.Value;
+            }
+
             if (!string.IsNullOrEmpty(user.Email))
             {
                 existingUser.Email = user.Email;
@@ -191,15 +196,11 @@ namespace 学生干部考评管理系统API.Service
                 existingUser.AvatarPath = user.AvatarPath;
             }
 
-            if (user.TotalScore != null)
-            {
-                existingUser.TotalScore = user.TotalScore;
-            }
 
             // 如果有密码更新，才更新密码
             if (!string.IsNullOrWhiteSpace(user.PasswordHash))
             {
-                existingUser.PasswordHash = user.PasswordHash;
+                existingUser.PasswordHash = CodeHelper.CreatePasswordHash(user.PasswordHash);
             }
 
             await _context.SaveChangesAsync();
@@ -227,8 +228,13 @@ namespace 学生干部考评管理系统API.Service
                     Score = float.Parse(user.Evaluatorsorce),
                     StudentCadreId = existingUser.Id,
                     EvaluationDate = DateTime.UtcNow,
-                    EvaluationType = EvaluationType.Peer
+                    
                 };
+                var eavuser =  _context.Users.FirstOrDefault(x => x.Id == int.Parse(user.EvaluatorId));
+                if (eavuser != null)
+                {
+                    evaluation.EvaluationType = eavuser.Role==UserRole.Teacher?  EvaluationType.Teacher : EvaluationType.Peer;
+                }
                 _context.Evaluations.Add(evaluation);
                 await _context.SaveChangesAsync();
             }

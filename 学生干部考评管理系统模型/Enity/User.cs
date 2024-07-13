@@ -73,6 +73,13 @@
             /// 其他人评价表
             /// </summary>
             public virtual ICollection<Evaluation>? OtherEvaluations { get; set; }
+
+
+            [NotMapped]
+            /// <summary>
+            /// 公告读取数量
+            /// </summary>
+            public virtual ICollection<AnnouncementReadStatus> ReadAnnouncements { get; set; } = new List<AnnouncementReadStatus>();
         }
     }
 
